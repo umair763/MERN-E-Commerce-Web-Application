@@ -13,9 +13,12 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: (process.env.CLIENT_ORIGINS || 'http://localhost:5173').split(','),
+    origin: [
+      "http://localhost:5173",
+      "https://mern-e-commerce-web-application.vercel.app",
+    ],
     credentials: true,
-  }),
+  })
 );
 
 app.use(express.json({ limit: '1mb' }));
