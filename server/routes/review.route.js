@@ -1,0 +1,10 @@
+const r = require('express').Router();
+const c = require('../controllers/review.controller');
+const { verifyToken, requireRole } = require('../middlewares/verify');
+r.get('/product/:productId', c.list);
+r.get('/mine', verifyToken, c.mine);
+r.post('/product/:productId', verifyToken, c.create);
+r.delete('/:id', verifyToken, c.remove);
+r.get('/admin/all', verifyToken, requireRole('admin', 'super_admin'), c.adminList);
+r.delete('/admin/:id', verifyToken, requireRole('admin', 'super_admin'), c.adminDelete);
+module.exports = r;

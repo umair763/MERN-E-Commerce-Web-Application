@@ -1,0 +1,10 @@
+const r = require('express').Router();
+const c = require('../controllers/cart.controller');
+const { verifyToken } = require('../middlewares/verify');
+r.use(verifyToken);
+r.get('/', c.get);
+r.post('/items', c.add);
+r.patch('/items/:itemId', c.update);
+r.delete('/items/:itemId', c.remove);
+r.delete('/', c.clear);
+module.exports = r;

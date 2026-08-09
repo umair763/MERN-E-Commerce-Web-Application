@@ -1,0 +1,13 @@
+const r = require('express').Router();
+const c = require('../controllers/order.controller');
+const { verifyToken, requireRole } = require('../middlewares/verify');
+r.use(verifyToken);
+r.post('/', c.create);
+r.get('/', c.mine);
+r.get('/admin/all', requireRole('admin', 'manager'), c.adminList);
+r.patch('/admin/:id/status', requireRole('admin', 'manager'), c.updateStatus);
+r.patch('/admin/:id', requireRole('admin', 'manager'), c.adminUpdate);
+r.delete('/admin/:id', requireRole('admin', 'manager'), c.adminDelete);
+r.get('/:id', c.get);
+r.patch('/:id/cancel', c.cancel);
+module.exports = r;

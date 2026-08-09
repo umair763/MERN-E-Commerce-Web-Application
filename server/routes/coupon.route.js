@@ -1,0 +1,12 @@
+const r = require('express').Router();
+const c = require('../controllers/coupon.controller');
+const { verifyToken, requireRole } = require('../middlewares/verify');
+r.post('/validate', verifyToken, c.validate);
+r.post('/register', verifyToken, c.register);
+r.get('/available', verifyToken, c.available);
+r.get('/my-coupons', verifyToken, c.userCoupons);
+r.get('/', verifyToken, requireRole('admin', 'manager'), c.list);
+r.post('/', verifyToken, requireRole('admin', 'manager'), c.create);
+r.patch('/:id', verifyToken, requireRole('admin', 'manager'), c.update);
+r.delete('/:id', verifyToken, requireRole('admin', 'manager'), c.remove);
+module.exports = r;

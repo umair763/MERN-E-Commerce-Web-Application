@@ -1,0 +1,10 @@
+const r = require('express').Router();
+const c = require('../controllers/product.controller');
+const { verifyToken, requireRole } = require('../middlewares/verify');
+const { asyncHandler } = require('../middlewares/error');
+r.get('/', c.list);
+r.get('/:id', c.get);
+r.post('/', verifyToken, requireRole('admin', 'manager'), c.create);
+r.patch('/:id', verifyToken, requireRole('admin', 'manager'), c.update);
+r.delete('/:id', verifyToken, requireRole('admin', 'manager'), c.archive);
+module.exports = r;

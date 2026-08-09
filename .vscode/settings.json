@@ -1,0 +1,8 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^cd \"d:\\\\Nastp course\\\\Node lab\\\\tasks\\\\StyleHive\\\\server\"; node -e \"\nrequire\\('dotenv'\\)\\.config\\(\\);\nconst mongoose = require\\('mongoose'\\);\nconst Order = require\\('\\./models/order\\.model'\\);\nOrder\\.schema\\.pre\\('save', function\\(next\\) \\{\n  console\\.log\\('hook called, next type:', typeof next\\);\n  if \\(this\\.payment && this\\.payment\\.method === 'offline'\\) this\\.payment\\.method = 'cod';\n  next\\(\\);\n\\}\\);\nconsole\\.log\\('pre hooks registered:', Order\\.schema\\._pres\\['save'\\]\\?\\.length\\);\n\"$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
+  }
+}
