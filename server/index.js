@@ -7,9 +7,24 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middlewares/error');
+const { handleStripeWebhook } = require('./controllers/payment.controller');
 const app = express();
 
 app.use(helmet());
+
+/*
+ * =========================================================
+ * STRIPE WEBHOOK
+ * =========================================================
+ *
+ * Must be registered BEFORE express.json() so the raw body
+ * is available for Stripe signature verification.
+ */
+app.post(
+  '/api/payments/webhook',
+  express.raw({ type: 'application/json' }),
+  handleStripeWebhook,
+);
 
 app.use(
   cors({

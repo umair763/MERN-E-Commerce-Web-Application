@@ -16,6 +16,8 @@ import {
   CartPage,
   CheckoutPage,
   OrdersPage,
+  PaymentSuccessPage,
+  PaymentCancelPage,
   WishlistPage,
   AddressesPage,
   ReturnsPage,
@@ -51,6 +53,8 @@ export const RouterRoutes = () => {
           <Route path="/dashboard/reviews" element={<ReviewsPage />} />
           <Route path="/dashboard/cart" element={<CartPage />} />
           <Route path="/dashboard/checkout" element={<CheckoutPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/cancel" element={<PaymentCancelPage />} />
           <Route path="/dashboard/orders" element={<OrdersPage />} />
           <Route path="/dashboard/wishlist" element={<WishlistPage />} />
           <Route path="/dashboard/addresses" element={<AddressesPage />} />

@@ -24,6 +24,7 @@ export const OrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [cancellingOrder, setCancellingOrder] = useState(null);
+  const [payingOrderId, setPayingOrderId] = useState(null);
   const [returningOrder, setReturningOrder] = useState(null);
   const [returnReason, setReturnReason] = useState("");
   const [returnItems, setReturnItems] = useState([]);
@@ -58,6 +59,41 @@ export const OrdersPage = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // ==========================
+  // PAY NOW (unpaid online order)
+  // ==========================
+
+  const handlePayNow = async (order) => {
+    try {
+      setPayingOrderId(order._id);
+
+      // Create a fresh Stripe Checkout Session for this order
+      // and redirect the customer to Stripe to complete payment.
+      const response = await fetch(`${BaseUrl}/api/payments/checkout`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ orderId: order._id }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.url) {
+        window.location.href = result.url;
+        return;
+      }
+
+      error(result.message || "Failed to start payment");
+    } catch (err) {
+      console.log(err);
+      error("Failed to start payment");
+    } finally {
+      setPayingOrderId(null);
+    }
+  };
 
   // ==========================
   // CANCEL ORDER
@@ -210,6 +246,14 @@ export const OrdersPage = () => {
     } else {
       const actions = [{ key: "view", label: "View", variant: "filled" }];
       
+      if (
+        order.payment?.method === "online" &&
+        order.payment?.status !== "paid" &&
+        order.status !== "cancelled"
+      ) {
+        actions.push({ key: "pay", label: "Pay Now", variant: "filled" });
+      }
+      
       if (order.status === "pending") {
         actions.push({ key: "cancel", label: "Cancel", variant: "danger" });
       }
@@ -316,6 +360,7 @@ export const OrdersPage = () => {
                             actions={getRowActions(order)}
                             onAction={(actionKey) => {
                               if (actionKey === "view") setSelectedOrder(order);
+                              if (actionKey === "pay") handlePayNow(order);
                               if (actionKey === "cancel") setCancellingOrder(order);
                               if (actionKey === "return") {
                                 setReturningOrder(order);

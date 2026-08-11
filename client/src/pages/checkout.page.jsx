@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../common";
 import { useToast } from "../common";
 import { useAuth } from "../context/AuthContext";
-import { ShoppingBag, MapPin, CreditCard, Truck } from "lucide-react";
+import { ShoppingBag, MapPin, CreditCard } from "lucide-react";
 
 const BaseUrl = import.meta.env.VITE_API_URL;
 
@@ -64,7 +64,8 @@ export const CheckoutPage = () => {
   useEffect(() => {
     fetchCart();
     fetchAddresses();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchCart, fetchAddresses]);
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress && (!newAddress.street || !newAddress.city)) {
@@ -86,7 +87,7 @@ export const CheckoutPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           shippingAddress,
           paymentMethod,
         }),
@@ -102,26 +103,29 @@ export const CheckoutPage = () => {
 
       const order = orderResult.data;
 
-      // Create payment record
-      const paymentResponse = await fetch(`${BaseUrl}/api/payments`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderId: order._id,
-          method: paymentMethod,
-        }),
-      });
+      if (paymentMethod === "online") {
+        // Create a Stripe Checkout Session and redirect the
+        // customer to Stripe to complete payment (STAGE 1).
+        const paymentResponse = await fetch(`${BaseUrl}/api/payments/checkout`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderId: order._id }),
+        });
 
-      const paymentResult = await paymentResponse.json();
+        const paymentResult = await paymentResponse.json();
 
-      if (paymentResponse.ok) {
-        success("Order placed successfully!");
+        if (paymentResponse.ok && paymentResult.url) {
+          window.location.href = paymentResult.url;
+          return;
+        }
+
+        error(paymentResult.message || "Failed to start payment");
         navigate("/dashboard/orders");
       } else {
-        error("Order placed but payment processing failed");
+        success("Order placed successfully!");
         navigate("/dashboard/orders");
       }
     } catch (error) {
@@ -159,7 +163,9 @@ export const CheckoutPage = () => {
         <div className="ml-3 mr-3">
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-200">
             <ShoppingBag size={64} className="text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Your cart is empty</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Your cart is empty
+            </h3>
             <p className="text-gray-500">Add products to proceed with checkout</p>
           </div>
         </div>
@@ -251,7 +257,9 @@ export const CheckoutPage = () => {
 
               <div className="border-t pt-4">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  {addresses.length > 0 ? "Or enter new address" : "Enter shipping address"}
+                  {addresses.length > 0
+                    ? "Or enter new address"
+                    : "Enter shipping address"}
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2">
@@ -259,7 +267,9 @@ export const CheckoutPage = () => {
                     <input
                       type="text"
                       value={newAddress.street}
-                      onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, street: e.target.value })
+                      }
                       className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -268,7 +278,9 @@ export const CheckoutPage = () => {
                     <input
                       type="text"
                       value={newAddress.city}
-                      onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, city: e.target.value })
+                      }
                       className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -277,7 +289,9 @@ export const CheckoutPage = () => {
                     <input
                       type="text"
                       value={newAddress.state}
-                      onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, state: e.target.value })
+                      }
                       className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -286,7 +300,9 @@ export const CheckoutPage = () => {
                     <input
                       type="text"
                       value={newAddress.zip}
-                      onChange={(e) => setNewAddress({ ...newAddress, zip: e.target.value })}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, zip: e.target.value })
+                      }
                       className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -295,7 +311,9 @@ export const CheckoutPage = () => {
                     <input
                       type="text"
                       value={newAddress.country}
-                      onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                      onChange={(e) =>
+                        setNewAddress({ ...newAddress, country: e.target.value })
+                      }
                       className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
@@ -322,7 +340,9 @@ export const CheckoutPage = () => {
                   />
                   <div>
                     <p className="font-medium">Cash on Delivery (COD)</p>
-                    <p className="text-sm text-gray-500">Pay when you receive your order</p>
+                    <p className="text-sm text-gray-500">
+                      Pay when you receive your order
+                    </p>
                   </div>
                 </label>
 
@@ -413,8 +433,14 @@ export const CheckoutPage = () => {
                 disabled={placingOrder}
                 className="w-full bg-[#4F30A9] text-white py-3 rounded-lg font-medium hover:bg-[#3d01d2] transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <Truck size={18} />
-                {placingOrder ? "Placing Order..." : "Place Order"}
+                <CreditCard size={18} />
+                {placingOrder
+                  ? paymentMethod === "online"
+                    ? "Redirecting to Stripe..."
+                    : "Placing Order..."
+                  : paymentMethod === "online"
+                    ? "Pay with Stripe"
+                    : "Place Order"}
               </button>
 
               <button

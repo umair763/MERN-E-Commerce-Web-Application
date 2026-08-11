@@ -1,9 +1,8 @@
 const r = require('express').Router();
 const c = require('../controllers/payment.controller');
-const { verifyToken, requireRole } = require('../middlewares/verify');
+const { verifyToken } = require('../middlewares/verify');
 r.use(verifyToken);
-r.post('/', c.create);
-r.post('/process', c.processPayment);
-r.get('/order/:orderId', c.getByOrder);
-r.patch('/:id/refund', requireRole('admin', 'manager'), c.refund);
+r.post('/checkout', c.createCheckoutSession);
+r.get('/session/:sessionId', c.getPaymentBySession);
+r.get('/:paymentId', c.getPayment);
 module.exports = r;

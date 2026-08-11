@@ -15,3 +15,4 @@ export * from './addresses.page';
 export * from './returns.page';
 export * from './profile.page';
 export * from './categories.page';
+export * from './payment.status.page';
